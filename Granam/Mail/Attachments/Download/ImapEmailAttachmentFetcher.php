@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
 
-namespace Granam\GpWebPay\Flat;
+namespace Granam\Mail\Attachments\Download;
 
 use Granam\Strict\Object\StrictObject;
 
@@ -14,6 +14,10 @@ class ImapEmailAttachmentFetcher extends StrictObject
     /** @var string */
     private $dirToSave;
 
+    /**
+     * @param ImapReadOnlyConnection $imapReadOnlyConnection
+     * @param string $dirToSave Temp dir is recommended
+     */
     public function __construct(ImapReadOnlyConnection $imapReadOnlyConnection, string $dirToSave)
     {
         $this->imapReadOnlyConnection = $imapReadOnlyConnection;
@@ -28,7 +32,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
     public function fetchAttachments(ImapSearchCriteria $imapSearchCriteria): array
     {
         $inbox = $this->imapReadOnlyConnection->getResource();
-        $emailNumbers = imap_search($inbox, $imapSearchCriteria->getAsString(), SE_FREE, $imapSearchCriteria->getCharsetForSearch());
+        $emailNumbers = \imap_search($inbox, $imapSearchCriteria->getAsString(), SE_FREE, $imapSearchCriteria->getCharsetForSearch());
         if (count($emailNumbers) === 0) {
             $this->imapReadOnlyConnection->closeResource();
 
@@ -36,8 +40,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
         }
         $attachmentFiles = [];
         foreach ($emailNumbers as $messageNumber) {
-            /* get mail structure */
-            $structure = imap_fetchstructure($inbox, $messageNumber);
+            $structure = \imap_fetchstructure($inbox, $messageNumber);
             $attachments = [];
             if (!empty($structure->parts)) {
                 foreach ($structure->parts as $index => $part) {
@@ -91,11 +94,11 @@ class ImapEmailAttachmentFetcher extends StrictObject
         }
 
         if ($attachment['is_attachment']) {
-            $attachment['attachment'] = imap_fetchbody($inbox, $messageNumber, $section);
+            $attachment['attachment'] = \imap_fetchbody($inbox, $messageNumber, $section);
             if ((int)$part->encoding === ENCBASE64) {
-                $attachment['attachment'] = base64_decode($attachment['attachment']);
+                $attachment['attachment'] = \base64_decode($attachment['attachment']);
             } elseif ((int)$part->encoding === ENCQUOTEDPRINTABLE) {
-                $attachment['attachment'] = quoted_printable_decode($attachment['attachment']);
+                $attachment['attachment'] = \quoted_printable_decode($attachment['attachment']);
             }
         }
 

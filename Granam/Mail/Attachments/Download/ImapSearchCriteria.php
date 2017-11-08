@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
 
-namespace Granam\GpWebPay\Flat;
+namespace Granam\Mail\Attachments\Download;
 
 use Granam\Strict\Object\StrictObject;
 
@@ -30,15 +30,15 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /** @var string|null */
     private $keywordContains;
     /** @var bool */
-    private $filterNew = false;
+    private $newOnly = false;
     /** @var bool */
-    private $filterOld = false;
+    private $oldOnly = false;
     /** @var \DateTime|null */
     private $byDate;
     /** @var bool */
-    private $filterRecent = false;
+    private $recentOnly = false;
     /** @var bool */
-    private $filterRead = false;
+    private $readOnly = false;
     /** @var \DateTime|null */
     private $since;
     /** @var string|null */
@@ -58,13 +58,13 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /** @var bool */
     private $notReadOnly = false;
 
-    public function __construct(string $charsetForSearch = null)
+    public function __construct(string $charsetForSearch = '')
     {
         $this->charsetForSearch = $charsetForSearch;
     }
 
-    /** @return string|null */
-    public function getCharsetForSearch()
+    /** @return string */
+    public function getCharsetForSearch(): string
     {
         return $this->charsetForSearch;
     }
@@ -72,12 +72,14 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function fetchAll(): ImapSearchCriteria // - return all messages matching the rest of the criteria
     {
         $this->all = true;
+
         return $this;
     }
 
     public function filterAnsweredOnly(): ImapSearchCriteria // - match messages with the \\ANSWERED flag set
     {
         $this->answeredOnly = true;
+
         return $this;
     }
 
@@ -89,6 +91,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function setBccContains(string $stringInBccField): ImapSearchCriteria // "string" - match messages with "string" in the Bcc: field
     {
         $this->bccContains = $stringInBccField;
+
         return $this;
     }
 
@@ -99,6 +102,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function setBefore(\DateTime $messagesBefore): ImapSearchCriteria // "date" - match messages with Date: before "date"
     {
         $this->before = $messagesBefore;
+
         return $this;
     }
 
@@ -109,6 +113,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function setBodyContains(string $stringInBody): ImapSearchCriteria // "string" - match messages with "string" in the body of the message
     {
         $this->bodyContains = $stringInBody;
+
         return $this;
     }
 
@@ -120,6 +125,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function setCcContains(string $stringInCcField): ImapSearchCriteria // "string" - match messages with "string" in the Cc: field
     {
         $this->ccContains = $stringInCcField;
+
         return $this;
     }
 
@@ -129,6 +135,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function filterDeletedOnly(): ImapSearchCriteria // - match deleted messages
     {
         $this->deletedOnly = true;
+
         return $this;
     }
 
@@ -139,102 +146,119 @@ class ImapSearchCriteria extends StrictObject implements ToString
     public function filterFlaggedOnly(): ImapSearchCriteria // - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
     {
         $this->flaggedOnly = true;
+
         return $this;
     }
 
     public function setFromContains(string $stringInFrom): ImapSearchCriteria // "string" - match messages with "string" in the From: field
     {
         $this->fromContains = $stringInFrom;
+
         return $this;
     }
 
     public function filterKeywordContains(string $stringInKeyword): ImapSearchCriteria // "string" - match messages with "string" as a keyword
     {
         $this->keywordContains = $stringInKeyword;
+
         return $this;
     }
 
-    public function filterNew(): ImapSearchCriteria // - match new messages
+    public function filterNewOnly(): ImapSearchCriteria // - match new messages
     {
-        $this->filterNew = true;
+        $this->newOnly = true;
+
         return $this;
     }
 
-    public function filterOld(): ImapSearchCriteria // - match old messages
+    public function filterOldOnly(): ImapSearchCriteria // - match old messages
     {
-        $this->filterOld = true;
+        $this->oldOnly = true;
+
         return $this;
     }
 
     public function filterByDate(\DateTime $dateTime): ImapSearchCriteria // "date" - match messages with Date: matching "date"
     {
         $this->byDate = $dateTime;
+
         return $this;
     }
 
-    public function activateRecent(): ImapSearchCriteria // - match messages with the \\RECENT flag set
+    public function filterRecentOnly(): ImapSearchCriteria // - match messages with the \\RECENT flag set
     {
-        $this->filterRecent = true;
+        $this->recentOnly = true;
+
         return $this;
     }
 
-    public function filterRead(): ImapSearchCriteria // - match messages that have been read (the \\SEEN flag is set)
+    public function filterReadOnly(): ImapSearchCriteria // - match messages that have been read (the \\SEEN flag is set)
     {
-        $this->filterRead = true;
+        $this->readOnly = true;
+
         return $this;
     }
 
     public function filterSince(\DateTime $since): ImapSearchCriteria // "date" - match messages with Date: after "date"
     {
         $this->since = $since;
+
         return $this;
     }
 
     public function filterSubjectContains(string $stringInSubject): ImapSearchCriteria // "string" - match messages with "string" in the Subject:
     {
         $this->subjectContains = $stringInSubject;
+
         return $this;
     }
 
     public function filterTextContains(string $stringInText): ImapSearchCriteria // "string" - match messages with text "string"
     {
         $this->textContains = $stringInText;
+
         return $this;
     }
 
     public function filterToContains(string $stringInToField): ImapSearchCriteria // "string" - match messages with "string" in the To:
     {
         $this->toContains = $stringInToField;
+
         return $this;
     }
 
-    public function filterUnanswered(): ImapSearchCriteria // - match messages that have not been answered
+    public function filterUnansweredOnly(): ImapSearchCriteria // - match messages that have not been answered
     {
         $this->unansweredOnly = true;
+
         return $this;
     }
 
-    public function filterNotDeleted(): ImapSearchCriteria // - match messages that are not deleted
+    public function filterNotDeletedOnly(): ImapSearchCriteria // - match messages that are not deleted
     {
         $this->notDeletedOnly = true;
+
         return $this;
     }
 
-    public function filterNotFlagged(): ImapSearchCriteria // - match messages that are not flagged
+    public function filterNotFlaggedOnly(): ImapSearchCriteria // - match messages that are not flagged
     {
         $this->notFlaggedOnly = true;
+
         return $this;
     }
 
     public function filterKeywordNotContains(string $stringNotInKeyword): ImapSearchCriteria // "string" - match messages that do not have the keyword "string"
     {
         $this->keywordNotContains = $stringNotInKeyword;
+
         return $this;
     }
 
-    public function filterNotRead(): ImapSearchCriteria // - match messages which have not been read yet
+    public function filterNotReadOnly(): ImapSearchCriteria // - match messages which have not been read yet
     {
         $this->notReadOnly = true;
+
         return $this;
     }
 
@@ -321,17 +345,17 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isFilterNew(): bool
+    public function isNewOnly(): bool
     {
-        return $this->filterNew;
+        return $this->newOnly;
     }
 
     /**
      * @return bool
      */
-    public function isFilterOld(): bool
+    public function isOldOnly(): bool
     {
-        return $this->filterOld;
+        return $this->oldOnly;
     }
 
     /**
@@ -345,17 +369,17 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isFilterRecent(): bool
+    public function isRecentOnly(): bool
     {
-        return $this->filterRecent;
+        return $this->recentOnly;
     }
 
     /**
      * @return bool
      */
-    public function isFilterRead(): bool
+    public function isReadOnly(): bool
     {
-        return $this->filterRead;
+        return $this->readOnly;
     }
 
     /**
@@ -463,19 +487,19 @@ class ImapSearchCriteria extends StrictObject implements ToString
         if ($this->getKeywordContains() !== null) {
             $flags[] = 'KEYWORD "' . $this->getKeywordContains() . '"';
         }
-        if ($this->isFilterNew()) {
+        if ($this->isNewOnly()) {
             $flags[] = 'NEW';
         }
-        if ($this->isFilterOld()) {
+        if ($this->isOldOnly()) {
             $flags[] = 'OLD';
         }
         if ($this->getByDate() !== null) {
             $flags[] = 'ON "' . $this->formatDate($this->getByDate()) . '"';
         }
-        if ($this->isFilterRecent()) {
+        if ($this->isRecentOnly()) {
             $flags[] = 'RECENT';
         }
-        if ($this->isFilterRead()) {
+        if ($this->isReadOnly()) {
             $flags[] = 'SEEN';
         }
         if ($this->getSince() !== null) {
@@ -506,7 +530,12 @@ class ImapSearchCriteria extends StrictObject implements ToString
             $flags[] = 'UNSEEN';
         }
 
-        return implode($flags);
+        $flagsString = implode($flags);
+        if ($flagsString !== '') {
+            return $flagsString;
+        }
+
+        return 'ALL';
     }
 
     private function formatDate(\DateTime $dateTime): string

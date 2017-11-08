@@ -1,5 +1,5 @@
 <?php
-namespace Granam\GpWebPay\Flat;
+namespace Granam\Mail\Attachments\Download;
 
 interface ToString
 {
