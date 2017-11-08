@@ -460,7 +460,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
             return 'ALL';
         }
         $flags = [];
-        if ($this->filterAnsweredOnly()) {
+        if ($this->isAnsweredOnly()) {
             $flags[] = 'ANSWERED';
         }
         if ($this->getBccContains() !== null) {
@@ -486,6 +486,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
         }
         if ($this->getKeywordContains() !== null) {
             $flags[] = 'KEYWORD "' . $this->getKeywordContains() . '"';
+        }
+        if ($this->getKeywordNotContains() !== null) {
+            $flags[] = 'UNKEYWORD "' . $this->getKeywordNotContains() . '"';
         }
         if ($this->isNewOnly()) {
             $flags[] = 'NEW';
@@ -523,14 +526,11 @@ class ImapSearchCriteria extends StrictObject implements ToString
         if ($this->isNotFlaggedOnly()) {
             $flags[] = 'UNFLAGGED';
         }
-        if ($this->getKeywordNotContains() !== null) {
-            $flags[] = 'UNKEYWORD "' . $this->getKeywordNotContains() . '"';
-        }
         if ($this->isNotReadOnly()) {
             $flags[] = 'UNSEEN';
         }
 
-        $flagsString = implode($flags);
+        $flagsString = implode(' ', $flags);
         if ($flagsString !== '') {
             return $flagsString;
         }
