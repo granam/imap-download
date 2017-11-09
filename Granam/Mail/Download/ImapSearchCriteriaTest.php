@@ -1,5 +1,5 @@
 <?php
-namespace Granam\Mail\Attachments\Download;
+namespace Granam\Mail\Download;
 
 use PHPUnit\Framework\TestCase;
 
@@ -11,9 +11,9 @@ class ImapSearchCriteriaTest extends TestCase
     public function I_can_create_it_with_any_search_charset()
     {
         $imapSearchCriteria = new ImapSearchCriteria();
-        self::assertSame('', $imapSearchCriteria->getCharsetForSearch());
-        $imapSearchCriteria = new ImapSearchCriteria('UTF-8');
         self::assertSame('UTF-8', $imapSearchCriteria->getCharsetForSearch());
+        $imapSearchCriteria = new ImapSearchCriteria('ISO-8859-2');
+        self::assertSame('ISO-8859-2', $imapSearchCriteria->getCharsetForSearch());
     }
 
     /**
@@ -52,17 +52,17 @@ class ImapSearchCriteriaTest extends TestCase
     public function I_can_get_filter_every_possible_combination()
     {
         $imapSearchCriteria = new ImapSearchCriteria();
-        $imapSearchCriteria->filterAnsweredOnly();
-        self::assertTrue($imapSearchCriteria->isAnsweredOnly());
+        $imapSearchCriteria->filterAnswered();
+        self::assertTrue($imapSearchCriteria->isAnswered());
         self::assertSame('ANSWERED', $imapSearchCriteria->getAsString());
         $imapSearchCriteria->filterByDate($now = new \DateTime());
         self::assertSame($now, $imapSearchCriteria->getByDate());
         self::assertSame('ANSWERED ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
-        $imapSearchCriteria->filterDeletedOnly();
-        self::assertTrue($imapSearchCriteria->isDeletedOnly());
+        $imapSearchCriteria->filterDeleted();
+        self::assertTrue($imapSearchCriteria->isDeleted());
         self::assertSame('ANSWERED DELETED ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
-        $imapSearchCriteria->filterFlaggedOnly();
-        self::assertTrue($imapSearchCriteria->isFlaggedOnly());
+        $imapSearchCriteria->filterFlagged();
+        self::assertTrue($imapSearchCriteria->isImportant());
         self::assertSame('ANSWERED DELETED FLAGGED ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
         $imapSearchCriteria->filterKeywordContains('foo');
         self::assertSame('foo', $imapSearchCriteria->getKeywordContains());
@@ -70,8 +70,8 @@ class ImapSearchCriteriaTest extends TestCase
         $imapSearchCriteria->filterKeywordNotContains('bar');
         self::assertSame('bar', $imapSearchCriteria->getKeywordNotContains());
         self::assertSame('ANSWERED DELETED FLAGGED KEYWORD "foo" UNKEYWORD "bar" ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
-        $imapSearchCriteria->filterNewOnly();
-        self::assertTrue($imapSearchCriteria->isNewOnly());
+        $imapSearchCriteria->filterNew();
+        self::assertTrue($imapSearchCriteria->isNew());
         self::assertSame('ANSWERED DELETED FLAGGED KEYWORD "foo" UNKEYWORD "bar" NEW ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
     }
 }

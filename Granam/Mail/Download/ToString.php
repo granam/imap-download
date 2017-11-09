@@ -1,5 +1,5 @@
 <?php
-namespace Granam\Mail\Attachments\Download;
+namespace Granam\Mail\Download;
 
 interface ToString
 {

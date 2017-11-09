@@ -1,64 +1,71 @@
 <?php
 declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
 
-namespace Granam\Mail\Attachments\Download;
+namespace Granam\Mail\Download;
 
 use Granam\Strict\Object\StrictObject;
 
+/**
+ * @link https://secure.php.net/manual/en/function.imap-search.php
+ */
 class ImapSearchCriteria extends StrictObject implements ToString
 {
-    /** @var string|null */
+    /** @var string */
     private $charsetForSearch;
+
     /** @var bool */
     private $all = false;
     /** @var bool */
-    private $answeredOnly = false;
-    /** @var string|null */
-    private $bccContains;
-    /** @var \DateTime|null */
-    private $before;
-    /** @var string|null */
-    private $bodyContains;
-    /** @var string|null */
-    private $ccContains;
+    private $answered = false;
     /** @var bool */
-    private $deletedOnly = false;
+    private $unanswered = false;
     /** @var bool */
-    private $flaggedOnly = false; // those marked as Important or Urgent
-    /** @var string|null */
-    private $fromContains;
-    /** @var string|null */
-    private $keywordContains;
+    private $important = false; // those marked as Flagged (Important or Urgent)
     /** @var bool */
-    private $newOnly = false;
+    private $notImportant = false; // those not marked as Flagged
+    /** @var bool */
+    private $new = false;
     /** @var bool */
     private $oldOnly = false;
+    /** @var bool */
+    private $recent = false;
+    /** @var bool */
+    private $read = false;
+    /** @var bool */
+    private $unread = false;
+    /** @var bool */
+    private $deleted = false;
+    /** @var bool */
+    private $notDeleted = false;
+    /** @var string */
+    private $ccContains = '';
+    /** @var string */
+    private $bccContains = '';
+    /** @var string */
+    private $bodyContains = '';
+    /** @var string */
+    private $fromContains = '';
+    /** @var string */
+    private $subjectContains = '';
+    /** @var string */
+    private $textContains = '';
+    /** @var string */
+    private $toContains = '';
+    /** @var string */
+    private $keywordContains = '';
+    /** @var string */
+    private $keywordNotContains = '';
     /** @var \DateTime|null */
     private $byDate;
-    /** @var bool */
-    private $recentOnly = false;
-    /** @var bool */
-    private $readOnly = false;
+    /** @var \DateTime|null */
+    private $before;
     /** @var \DateTime|null */
     private $since;
-    /** @var string|null */
-    private $subjectContains;
-    /** @var string|null */
-    private $textContains;
-    /** @var string|null */
-    private $toContains;
-    /** @var bool */
-    private $unansweredOnly = false;
-    /** @var bool */
-    private $notDeletedOnly = false;
-    /** @var bool */
-    private $notFlaggedOnly = false;
-    /** @var string|null */
-    private $keywordNotContains;
-    /** @var bool */
-    private $notReadOnly = false;
 
-    public function __construct(string $charsetForSearch = '')
+    /**
+     * @param string $charsetForSearch @link https://secure.php.net/manual/en/mbstring.supported-encodings.php
+     */
+    public function __construct(string $charsetForSearch = 'UTF-8')
     {
         $this->charsetForSearch = $charsetForSearch;
     }
@@ -69,16 +76,32 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this->charsetForSearch;
     }
 
+    /**
+     * @return ImapSearchCriteria
+     * @throws \Granam\Mail\Download\Exceptions\InvalidFilterCombination
+     */
     public function fetchAll(): ImapSearchCriteria // - return all messages matching the rest of the criteria
     {
+        if ($this->isAnswered() || $this->isUnanswered() || $this->isImportant() || $this->isNotImportant()
+            || $this->isNew() || $this->isOldOnly() || $this->isRecent() || $this->isRead() || $this->isUnread()
+            || $this->isDeleted() || $this->isNotDeleted() || $this->getCcContains() !== ''
+            || $this->getBccContains() !== '' || $this->getBodyContains() !== ''
+            || $this->getFromContains() || $this->getSubjectContains() || $this->getTextContains() !== ''
+            || $this->getToContains() !== '' || $this->getKeywordContains() !== '' || $this->getKeywordNotContains() !== ''
+            || $this->getByDate() !== null || $this->getBefore() !== null || $this->getSince() !== null
+        ) {
+            throw new Exceptions\InvalidFilterCombination(
+                'Can not use ALL when there are already some specific search criteria: ' . $this->getAsString()
+            );
+        }
         $this->all = true;
 
         return $this;
     }
 
-    public function filterAnsweredOnly(): ImapSearchCriteria // - match messages with the \\ANSWERED flag set
+    public function filterAnswered(): ImapSearchCriteria // - match messages with the \\ANSWERED flag set
     {
-        $this->answeredOnly = true;
+        $this->answered = true;
 
         return $this;
     }
@@ -132,9 +155,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return ImapSearchCriteria
      */
-    public function filterDeletedOnly(): ImapSearchCriteria // - match deleted messages
+    public function filterDeleted(): ImapSearchCriteria // - match deleted messages
     {
-        $this->deletedOnly = true;
+        $this->deleted = true;
 
         return $this;
     }
@@ -143,9 +166,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
      * Filter only emails flagged as Important (sometimes Urgent)
      * @return $this
      */
-    public function filterFlaggedOnly(): ImapSearchCriteria // - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
+    public function filterFlagged(): ImapSearchCriteria // - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
     {
-        $this->flaggedOnly = true;
+        $this->important = true;
 
         return $this;
     }
@@ -164,14 +187,14 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterNewOnly(): ImapSearchCriteria // - match new messages
+    public function filterNew(): ImapSearchCriteria // - match new messages
     {
-        $this->newOnly = true;
+        $this->new = true;
 
         return $this;
     }
 
-    public function filterOldOnly(): ImapSearchCriteria // - match old messages
+    public function filterOld(): ImapSearchCriteria // - match old messages
     {
         $this->oldOnly = true;
 
@@ -185,16 +208,16 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterRecentOnly(): ImapSearchCriteria // - match messages with the \\RECENT flag set
+    public function filterRecent(): ImapSearchCriteria // - match messages with the \\RECENT flag set
     {
-        $this->recentOnly = true;
+        $this->recent = true;
 
         return $this;
     }
 
-    public function filterReadOnly(): ImapSearchCriteria // - match messages that have been read (the \\SEEN flag is set)
+    public function filterRead(): ImapSearchCriteria // - match messages that have been read (the \\SEEN flag is set)
     {
-        $this->readOnly = true;
+        $this->read = true;
 
         return $this;
     }
@@ -227,23 +250,23 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterUnansweredOnly(): ImapSearchCriteria // - match messages that have not been answered
+    public function filterUnanswered(): ImapSearchCriteria // - match messages that have not been answered
     {
-        $this->unansweredOnly = true;
+        $this->unanswered = true;
 
         return $this;
     }
 
-    public function filterNotDeletedOnly(): ImapSearchCriteria // - match messages that are not deleted
+    public function filterNotDeleted(): ImapSearchCriteria // - match messages that are not deleted
     {
-        $this->notDeletedOnly = true;
+        $this->notDeleted = true;
 
         return $this;
     }
 
-    public function filterNotFlaggedOnly(): ImapSearchCriteria // - match messages that are not flagged
+    public function filterNotFlagged(): ImapSearchCriteria // - match messages that are not flagged
     {
-        $this->notFlaggedOnly = true;
+        $this->notImportant = true;
 
         return $this;
     }
@@ -255,9 +278,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterNotReadOnly(): ImapSearchCriteria // - match messages which have not been read yet
+    public function filterNotRead(): ImapSearchCriteria // - match messages which have not been read yet
     {
-        $this->notReadOnly = true;
+        $this->unread = true;
 
         return $this;
     }
@@ -273,15 +296,15 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isAnsweredOnly(): bool
+    public function isAnswered(): bool
     {
-        return $this->answeredOnly;
+        return $this->answered;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getBccContains()
+    public function getBccContains(): string
     {
         return $this->bccContains;
     }
@@ -295,17 +318,17 @@ class ImapSearchCriteria extends StrictObject implements ToString
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getBodyContains()
+    public function getBodyContains(): string
     {
         return $this->bodyContains;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getCcContains()
+    public function getCcContains(): string
     {
         return $this->ccContains;
     }
@@ -313,31 +336,31 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isDeletedOnly(): bool
+    public function isDeleted(): bool
     {
-        return $this->deletedOnly;
+        return $this->deleted;
     }
 
     /**
      * @return bool
      */
-    public function isFlaggedOnly(): bool
+    public function isImportant(): bool
     {
-        return $this->flaggedOnly;
+        return $this->important;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getFromContains()
+    public function getFromContains(): string
     {
         return $this->fromContains;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getKeywordContains()
+    public function getKeywordContains(): string
     {
         return $this->keywordContains;
     }
@@ -345,9 +368,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isNewOnly(): bool
+    public function isNew(): bool
     {
-        return $this->newOnly;
+        return $this->new;
     }
 
     /**
@@ -369,17 +392,17 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isRecentOnly(): bool
+    public function isRecent(): bool
     {
-        return $this->recentOnly;
+        return $this->recent;
     }
 
     /**
      * @return bool
      */
-    public function isReadOnly(): bool
+    public function isRead(): bool
     {
-        return $this->readOnly;
+        return $this->read;
     }
 
     /**
@@ -391,25 +414,25 @@ class ImapSearchCriteria extends StrictObject implements ToString
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getSubjectContains()
+    public function getSubjectContains(): string
     {
         return $this->subjectContains;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getTextContains()
+    public function getTextContains(): string
     {
         return $this->textContains;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getToContains()
+    public function getToContains(): string
     {
         return $this->toContains;
     }
@@ -417,31 +440,31 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isUnansweredOnly(): bool
+    public function isUnanswered(): bool
     {
-        return $this->unansweredOnly;
+        return $this->unanswered;
     }
 
     /**
      * @return bool
      */
-    public function isNotDeletedOnly(): bool
+    public function isNotDeleted(): bool
     {
-        return $this->notDeletedOnly;
+        return $this->notDeleted;
     }
 
     /**
      * @return bool
      */
-    public function isNotFlaggedOnly(): bool
+    public function isNotImportant(): bool
     {
-        return $this->notFlaggedOnly;
+        return $this->notImportant;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getKeywordNotContains()
+    public function getKeywordNotContains(): string
     {
         return $this->keywordNotContains;
     }
@@ -449,9 +472,9 @@ class ImapSearchCriteria extends StrictObject implements ToString
     /**
      * @return bool
      */
-    public function isNotReadOnly(): bool
+    public function isUnread(): bool
     {
-        return $this->notReadOnly;
+        return $this->unread;
     }
 
     public function getAsString(): string
@@ -460,37 +483,37 @@ class ImapSearchCriteria extends StrictObject implements ToString
             return 'ALL';
         }
         $flags = [];
-        if ($this->isAnsweredOnly()) {
+        if ($this->isAnswered()) {
             $flags[] = 'ANSWERED';
         }
-        if ($this->getBccContains() !== null) {
+        if ($this->getBccContains() !== '') {
             $flags[] = 'BCC "' . $this->getBccContains() . '"';
         }
         if ($this->getBefore() !== null) {
             $flags[] = 'BEFORE "' . $this->formatDate($this->getBefore()) . '"';
         }
-        if ($this->getBodyContains() !== null) {
+        if ($this->getBodyContains() !== '') {
             $flags[] = 'BODY "' . $this->getBodyContains() . '"';
         }
-        if ($this->getCcContains() !== null) {
+        if ($this->getCcContains() !== '') {
             $flags[] = 'CC "' . $this->getCcContains() . '"';
         }
-        if ($this->isDeletedOnly()) {
+        if ($this->isDeleted()) {
             $flags[] = 'DELETED';
         }
-        if ($this->isFlaggedOnly()) {
+        if ($this->isImportant()) {
             $flags[] = 'FLAGGED';
         }
-        if ($this->getFromContains() !== null) {
+        if ($this->getFromContains() !== '') {
             $flags[] = 'FROM "' . $this->getFromContains() . '"';
         }
-        if ($this->getKeywordContains() !== null) {
+        if ($this->getKeywordContains() !== '') {
             $flags[] = 'KEYWORD "' . $this->getKeywordContains() . '"';
         }
-        if ($this->getKeywordNotContains() !== null) {
+        if ($this->getKeywordNotContains() !== '') {
             $flags[] = 'UNKEYWORD "' . $this->getKeywordNotContains() . '"';
         }
-        if ($this->isNewOnly()) {
+        if ($this->isNew()) {
             $flags[] = 'NEW';
         }
         if ($this->isOldOnly()) {
@@ -499,35 +522,35 @@ class ImapSearchCriteria extends StrictObject implements ToString
         if ($this->getByDate() !== null) {
             $flags[] = 'ON "' . $this->formatDate($this->getByDate()) . '"';
         }
-        if ($this->isRecentOnly()) {
+        if ($this->isRecent()) {
             $flags[] = 'RECENT';
         }
-        if ($this->isReadOnly()) {
+        if ($this->isRead()) {
             $flags[] = 'SEEN';
+        }
+        if ($this->isUnread()) {
+            $flags[] = 'UNSEEN';
         }
         if ($this->getSince() !== null) {
             $flags[] = 'SINCE "' . $this->formatDate($this->getSince()) . '"';
         }
-        if ($this->getSubjectContains() !== null) {
+        if ($this->getSubjectContains() !== '') {
             $flags[] = 'SUBJECT "' . $this->getSubjectContains() . '"';
         }
-        if ($this->getTextContains() !== null) {
+        if ($this->getTextContains() !== '') {
             $flags[] = 'TEXT "' . $this->getTextContains() . '"';
         }
-        if ($this->getToContains() !== null) {
+        if ($this->getToContains() !== '') {
             $flags[] = 'TO "' . $this->getToContains() . '"';
         }
-        if ($this->isUnansweredOnly()) {
+        if ($this->isUnanswered()) {
             $flags[] = 'UNANSWERED';
         }
-        if ($this->isNotDeletedOnly()) {
+        if ($this->isNotDeleted()) {
             $flags[] = 'UNDELETED';
         }
-        if ($this->isNotFlaggedOnly()) {
+        if ($this->isNotImportant()) {
             $flags[] = 'UNFLAGGED';
-        }
-        if ($this->isNotReadOnly()) {
-            $flags[] = 'UNSEEN';
         }
 
         $flagsString = implode(' ', $flags);

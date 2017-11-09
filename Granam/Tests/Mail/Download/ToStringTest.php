@@ -1,7 +1,7 @@
 <?php
-namespace Granam\Tests\Mail\Attachments\Download;
+namespace Granam\Tests\Mail\Download;
 
-use Granam\Mail\Attachments\Download\ToString;
+use Granam\Mail\Download\ToString;
 use PHPUnit\Framework\TestCase;
 
 class ToStringTest extends TestCase

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
 
-namespace Granam\Mail\Attachments\Download;
+namespace Granam\Mail\Download;
 
 use Granam\Strict\Object\StrictObject;
 

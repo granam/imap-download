@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
 
-namespace Granam\Mail\Attachments\Download;
+namespace Granam\Mail\Download;
 
 use Granam\Strict\Object\StrictObject;
 
@@ -21,12 +21,12 @@ class ImapEmailAttachmentFetcher extends StrictObject
     public function __construct(ImapReadOnlyConnection $imapReadOnlyConnection, string $dirToSave)
     {
         $this->imapReadOnlyConnection = $imapReadOnlyConnection;
-        $this->dirToSave = $dirToSave;
+        $this->dirToSave = rtrim($dirToSave, '\\/');
     }
 
     /**
      * @param ImapSearchCriteria $imapSearchCriteria
-     * @return array|string[] List of file
+     * @return array|string[][] List of files [filepath => ..., original_filename => ..., name => ...]
      * @throws \RuntimeException
      */
     public function fetchAttachments(ImapSearchCriteria $imapSearchCriteria): array
@@ -52,7 +52,11 @@ class ImapEmailAttachmentFetcher extends StrictObject
             }
             foreach ($attachments as $attachment) {
                 if ($attachment['is_attachment']) {
-                    $attachmentFiles[] = $this->writeAttachment($attachment['attachment']);
+                    $attachmentFiles[] = [
+                        'filepath' => $this->writeAttachment($attachment['attachment']),
+                        'original_filename' => $attachment['filename'],
+                        'name' => $attachment['name']
+                    ];
                 }
             }
         }
@@ -94,7 +98,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
         }
 
         if ($attachment['is_attachment']) {
-            $attachment['attachment'] = \imap_fetchbody($inbox, $messageNumber, $section);
+            $attachment['attachment'] = \imap_fetchbody($inbox, $messageNumber, (string)$section);
             if ((int)$part->encoding === ENCBASE64) {
                 $attachment['attachment'] = \base64_decode($attachment['attachment']);
             } elseif ((int)$part->encoding === ENCQUOTEDPRINTABLE) {
@@ -109,22 +113,25 @@ class ImapEmailAttachmentFetcher extends StrictObject
         return null;
     }
 
-    private function writeAttachment($attachment): string
+    private function writeAttachment(string $attachment): string
     {
-        $this->writeAttachment($attachment['attachment']);
         if (!file_exists($this->dirToSave) && !@mkdir($this->dirToSave, 0770, true) && !is_dir($this->dirToSave)) {
             throw new \RuntimeException('Could not create dir to save email attachments: ' . $this->dirToSave);
         }
         $filename = (uniqid('imap', true) . '.attachment');
-        $fullFilename = $this->dirToSave . rtrim('\\/') . '/' . $filename;
-        $handle = fopen($fullFilename, 'wb');
+        $fullFilename = $this->dirToSave . '/' . $filename;
+        $handle = @fopen($fullFilename, 'wb');
         if (!$handle) {
-            throw new \RuntimeException('Could not save an email attachment as ' . $fullFilename);
+            throw new \RuntimeException(
+                'Could not save an email attachment as ' . $fullFilename . '; ' . var_export(error_get_last(), true)
+            );
         }
-        if (fwrite($handle, $attachment['attachment']) === false) {
+        if (@fwrite($handle, $attachment) === false) {
             fclose($handle);
             unlink($fullFilename);
-            throw new \RuntimeException('Could not write an email attachment into ' . $fullFilename);
+            throw new \RuntimeException(
+                'Could not write an email attachment into ' . $fullFilename . '; ' . var_export(error_get_last(), true)
+            );
         }
         fclose($handle);
 

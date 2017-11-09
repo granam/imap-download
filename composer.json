@@ -1,7 +1,7 @@
 {
-  "name": "granam/mail-attachments-download",
+  "name": "granam/imap-download",
   "type": "library",
-  "description": "Downloader of attachments from IMAP emails",
+  "description": "Downloader of emails via IMAP",
   "keywords": [
     "mail",
     "email",
@@ -9,7 +9,7 @@
     "download",
     "imap"
   ],
-  "homepage": "https://github.com/jaroslavtyc/granam-mail-attachments-download",
+  "homepage": "https://github.com/jaroslavtyc/granam-imap-download",
   "license": [
     "MIT"
   ],
@@ -21,7 +21,7 @@
   ],
   "support": {
     "email": "mail@jaroslavtyc.com",
-    "issues": "https://github.com/jaroslavtyc/granam-mail-attachments-download/issues"
+    "issues": "https://github.com/jaroslavtyc/granam-imap-download/issues"
   },
   "require": {
     "php": ">=7.0",
