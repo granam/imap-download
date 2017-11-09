@@ -21,7 +21,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
     public function __construct(ImapReadOnlyConnection $imapReadOnlyConnection, string $dirToSave = '')
     {
         $this->imapReadOnlyConnection = $imapReadOnlyConnection;
-        $this->dirToSave = $dirToSave !== '' ? rtrim($dirToSave, '\\/') : sys_get_temp_dir();
+        $this->dirToSave = rtrim($dirToSave !== '' ? $dirToSave : sys_get_temp_dir(), '\\/');
     }
 
     /**

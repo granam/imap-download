@@ -27,15 +27,15 @@ class ImapEmailAttachmentFetcherTest extends TestCase
     {
         $imapEmailAttachmentFetcher = new ImapEmailAttachmentFetcher($this->getImapReadOnlyConnection(), sys_get_temp_dir());
         $attachments = $imapEmailAttachmentFetcher->fetchAttachments(
-            (new ImapSearchCriteria())->filterSubjectContains('Aplikace OMS - data file 09.11.2017')
+            (new ImapSearchCriteria())->filterSubjectContains('Aplikace OMS - data file 22.04.2016')
         );
         self::assertCount(1, $attachments);
         $attachment = current($attachments);
-        self::assertSame('Vzor FLAT.txt', $attachment['name']);
-        self::assertSame('Vzor FLAT.txt', $attachment['original_filename']);
+        self::assertSame('VDAT-000819-123450001-123450001-20160422.TXT', $attachment['name']);
+        self::assertSame('VDAT-000819-123450001-123450001-20160422.TXT', $attachment['original_filename']);
         self::assertFileExists($attachment['filepath']);
         self::assertSame(
-            file_get_contents(__DIR__ . '/data/Vzor FLAT.txt'),
+            file_get_contents(__DIR__ . '/data/VDAT-000819-123450001-123450001-20160422.TXT'),
             file_get_contents($attachment['filepath'])
         );
         unlink($attachment['filepath']);
