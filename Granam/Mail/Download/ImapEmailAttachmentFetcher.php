@@ -27,12 +27,23 @@ class ImapEmailAttachmentFetcher extends StrictObject
     /**
      * @param ImapSearchCriteria $imapSearchCriteria
      * @return array|string[][] List of files [filepath => ..., original_filename => ..., name => ...]
+     * @throws \Granam\Mail\Download\Exceptions\UnknownSearchCriteria
      * @throws \RuntimeException
      */
     public function fetchAttachments(ImapSearchCriteria $imapSearchCriteria): array
     {
         $inbox = $this->imapReadOnlyConnection->getResource();
         $emailNumbers = \imap_search($inbox, $imapSearchCriteria->getAsString(), SE_FREE, $imapSearchCriteria->getCharsetForSearch());
+        if ($emailNumbers === false) {
+            if (\imap_last_error() !== false) {
+                throw new Exceptions\UnknownSearchCriteria(
+                    "IMAP probably does not recognize filter '{$imapSearchCriteria->getAsString()}'"
+                    . '; ' . \imap_last_error()
+                );
+            }
+
+            return [];
+        }
         if (count($emailNumbers) === 0) {
             $this->imapReadOnlyConnection->closeResource();
 
