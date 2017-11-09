@@ -11,6 +11,18 @@ class ImapEmailAttachmentFetcherTest extends TestCase
     /**
      * @test
      */
+    public function System_default_temp_dir_is_used_as_default_dir_for_attachments()
+    {
+        $imapEmailAttachmentFetcher = new ImapEmailAttachmentFetcher($this->getImapReadOnlyConnection());
+        $reflection = new \ReflectionClass(ImapEmailAttachmentFetcher::class);
+        $dirToSave = $reflection->getProperty('dirToSave');
+        $dirToSave->setAccessible(true);
+        self::assertSame(sys_get_temp_dir(), $dirToSave->getValue($imapEmailAttachmentFetcher));
+    }
+
+    /**
+     * @test
+     */
     public function I_can_fetch_attachment_from_email_via_imap()
     {
         $imapEmailAttachmentFetcher = new ImapEmailAttachmentFetcher($this->getImapReadOnlyConnection(), sys_get_temp_dir());

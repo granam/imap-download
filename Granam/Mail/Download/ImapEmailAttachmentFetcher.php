@@ -18,10 +18,10 @@ class ImapEmailAttachmentFetcher extends StrictObject
      * @param ImapReadOnlyConnection $imapReadOnlyConnection
      * @param string $dirToSave Temp dir is recommended
      */
-    public function __construct(ImapReadOnlyConnection $imapReadOnlyConnection, string $dirToSave)
+    public function __construct(ImapReadOnlyConnection $imapReadOnlyConnection, string $dirToSave = '')
     {
         $this->imapReadOnlyConnection = $imapReadOnlyConnection;
-        $this->dirToSave = rtrim($dirToSave, '\\/');
+        $this->dirToSave = $dirToSave !== '' ? rtrim($dirToSave, '\\/') : sys_get_temp_dir();
     }
 
     /**
