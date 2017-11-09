@@ -10,7 +10,7 @@ use Granam\Mail\Download\ImapReadOnlyConnection;
 use Granam\Mail\Download\ImapSearchCriteria;
 
 $imapConnection = new ImapReadOnlyConnection(
-    'light.in.tunnel@gmail.com',
+    'light.in.tunnel@example.com',
     'Раѕѕword123',
     'imap.example.com'
 );
