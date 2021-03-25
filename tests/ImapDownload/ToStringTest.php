@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace Granam\Tests\Mail\Download;
 
 use Granam\Mail\Download\ToString;

@@ -1,6 +1,8 @@
-<?php
-namespace Granam\Mail\Download;
+<?php declare(strict_types=1);
 
+namespace Granam\Tests\Mail\Download;
+
+use Granam\Mail\Download\ImapSearchCriteria;
 use PHPUnit\Framework\TestCase;
 
 class ImapSearchCriteriaTest extends TestCase
@@ -28,7 +30,6 @@ class ImapSearchCriteriaTest extends TestCase
             }
             self::assertTrue($method->hasReturnType(), "Method {$method->getName()} should have a return type");
             $returnType = $method->getReturnType();
-            /** @noinspection NullPointerExceptionInspection */
             self::assertSame(ImapSearchCriteria::class, $returnType->getName());
         }
     }

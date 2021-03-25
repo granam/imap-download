@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace Granam\Tests\Mail\Download;
 
 use Granam\Mail\Download\ImapEmailAttachmentFetcher;
@@ -34,15 +35,20 @@ class ImapEmailAttachmentFetcherTest extends TestCase
         self::assertSame('VDAT-000819-123450001-123450001-20160422.TXT', $attachment['name']);
         self::assertSame('VDAT-000819-123450001-123450001-20160422.TXT', $attachment['original_filename']);
         self::assertFileExists($attachment['filepath']);
-        self::assertSame(
-            file_get_contents(__DIR__ . '/data/VDAT-000819-123450001-123450001-20160422.TXT'),
-            file_get_contents($attachment['filepath'])
+        self::assertFileEquals(
+            __DIR__ . '/data/VDAT-000819-123450001-123450001-20160422.TXT',
+            $attachment['filepath']
         );
         unlink($attachment['filepath']);
     }
 
     private function getImapReadOnlyConnection(): ImapReadOnlyConnection
     {
+        /**
+         * NOTICE to connect by such a simple way to Gmail the account has to have allowed less secure apps.
+         * Standard, secure and HIGHLY RECOMMENDED way is to connect your PHP application with Google as a, well, known app
+         * (via Google console - APIs & Services)
+         */
         return new ImapReadOnlyConnection(
             'test.imap.attachments@gmail.com',
             'Djw73FkgFy4afctepzkM',

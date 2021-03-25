@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
+<?php declare(strict_types=1);
 
 namespace Granam\Mail\Download;
 
@@ -33,12 +32,12 @@ class ImapEmailAttachmentFetcher extends StrictObject
     public function fetchAttachments(ImapSearchCriteria $imapSearchCriteria): array
     {
         $inbox = $this->imapReadOnlyConnection->getResource();
-        $emailNumbers = \imap_search($inbox, $imapSearchCriteria->getAsString(), SE_FREE, $imapSearchCriteria->getCharsetForSearch());
+        $emailNumbers = imap_search($inbox, $imapSearchCriteria->getAsString(), SE_FREE, $imapSearchCriteria->getCharsetForSearch());
         if ($emailNumbers === false) {
-            if (\imap_last_error() !== false) {
+            if (imap_last_error() !== false) {
                 throw new Exceptions\UnknownSearchCriteria(
                     "IMAP probably does not recognize filter '{$imapSearchCriteria->getAsString()}'"
-                    . '; ' . \imap_last_error()
+                    . '; ' . imap_last_error()
                 );
             }
 
@@ -51,7 +50,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
         }
         $attachmentFiles = [];
         foreach ($emailNumbers as $messageNumber) {
-            $structure = \imap_fetchstructure($inbox, $messageNumber);
+            $structure = imap_fetchstructure($inbox, $messageNumber);
             $attachments = [];
             if (!empty($structure->parts)) {
                 foreach ($structure->parts as $index => $part) {
@@ -66,7 +65,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
                     $attachmentFiles[] = [
                         'filepath' => $this->writeAttachment($attachment['attachment']),
                         'original_filename' => $attachment['filename'],
-                        'name' => $attachment['name']
+                        'name' => $attachment['name'],
                     ];
                 }
             }
@@ -83,13 +82,13 @@ class ImapEmailAttachmentFetcher extends StrictObject
      * @param int $section
      * @return array|null
      */
-    private function collectAttachment($part, $inbox, $messageNumber, int $section)
+    private function collectAttachment(object $part, $inbox, $messageNumber, int $section): ?array
     {
         $attachment = [
             'is_attachment' => false,
             'filename' => '',
             'name' => '',
-            'attachment' => ''
+            'attachment' => '',
         ];
         if ($part->ifdparameters) { // TRUE if the dparameters array exists
             foreach ($part->dparameters as $object) {
@@ -109,11 +108,11 @@ class ImapEmailAttachmentFetcher extends StrictObject
         }
 
         if ($attachment['is_attachment']) {
-            $attachment['attachment'] = \imap_fetchbody($inbox, $messageNumber, (string)$section);
+            $attachment['attachment'] = imap_fetchbody($inbox, $messageNumber, (string)$section);
             if ((int)$part->encoding === ENCBASE64) {
-                $attachment['attachment'] = \base64_decode($attachment['attachment']);
+                $attachment['attachment'] = base64_decode($attachment['attachment']);
             } elseif ((int)$part->encoding === ENCQUOTEDPRINTABLE) {
-                $attachment['attachment'] = \quoted_printable_decode($attachment['attachment']);
+                $attachment['attachment'] = quoted_printable_decode($attachment['attachment']);
             }
         }
 

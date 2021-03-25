@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1); // on PHP 7+ are standard PHP methods strict to types of given parameters
+<?php declare(strict_types=1);
 
 namespace Granam\Mail\Download;
 
@@ -46,7 +45,7 @@ class ImapReadOnlyConnection extends StrictObject
     public function getResource()
     {
         if ($this->resource === null) {
-            $this->resource = @\imap_open($this->getHostName(), $this->userName, $this->password, OP_READONLY);
+            $this->resource = @imap_open($this->getHostName(), $this->userName, $this->password, OP_READONLY);
             if ($this->resource === false) {
                 throw new \RuntimeException('Could not connect to ' . $this->getHostName() . ' because of "' . imap_last_error() . '"');
             }
@@ -68,7 +67,7 @@ class ImapReadOnlyConnection extends StrictObject
     public function closeResource()
     {
         if ($this->resource) {
-            \imap_close($this->resource);
+            imap_close($this->resource);
             $this->resource = null;
         }
     }
