@@ -64,7 +64,9 @@ class ImapEmailAttachmentFetcher extends StrictObject
                 if ($attachment['is_attachment']) {
                     $attachmentFiles[] = [
                         'filepath' => $this->writeAttachment($attachment['attachment']),
-                        'original_filename' => $attachment['filename'],
+                        'original_filename' => $attachment['filename'] !== ''
+                            ? $attachment['filename']
+                            : $attachment['name'],
                         'name' => $attachment['name'],
                     ];
                 }
@@ -102,7 +104,7 @@ class ImapEmailAttachmentFetcher extends StrictObject
             foreach ($part->parameters as $object) {
                 if (strtolower($object->attribute) === 'name') {
                     $attachment['is_attachment'] = true;
-                    $attachment['name'] = $object->value;
+                    $attachment['name'] = imap_utf8($object->value);
                 }
             }
         }

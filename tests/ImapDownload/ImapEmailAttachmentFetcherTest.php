@@ -44,15 +44,10 @@ class ImapEmailAttachmentFetcherTest extends TestCase
 
     private function getImapReadOnlyConnection(): ImapReadOnlyConnection
     {
-        /**
-         * NOTICE to connect by such a simple way to Gmail the account has to have allowed less secure apps.
-         * Standard, secure and HIGHLY RECOMMENDED way is to connect your PHP application with Google as a, well, known app
-         * (via Google console - APIs & Services)
-         */
         return new ImapReadOnlyConnection(
-            'test.imap.attachments@gmail.com',
+            'test.imap.attachments@email.cz',
             'Djw73FkgFy4afctepzkM',
-            'imap.gmail.com'
+            'imap.seznam.cz'
         );
     }
 }
