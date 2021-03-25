@@ -56,7 +56,7 @@ class ImapSearchCriteriaTest extends TestCase
         $imapSearchCriteria->filterAnswered();
         self::assertTrue($imapSearchCriteria->isAnswered());
         self::assertSame('ANSWERED', $imapSearchCriteria->getAsString());
-        $imapSearchCriteria->filterByDate($now = new \DateTime());
+        $imapSearchCriteria->filterByDate($now = new \DateTimeImmutable());
         self::assertSame($now, $imapSearchCriteria->getByDate());
         self::assertSame('ANSWERED ON "' . $now->format('j F Y') . '"', $imapSearchCriteria->getAsString());
         $imapSearchCriteria->filterDeleted();

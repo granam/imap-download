@@ -54,11 +54,11 @@ class ImapSearchCriteria extends StrictObject implements ToString
     private $keywordContains = '';
     /** @var string */
     private $keywordNotContains = '';
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     private $byDate;
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     private $before;
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     private $since;
 
     /**
@@ -69,7 +69,6 @@ class ImapSearchCriteria extends StrictObject implements ToString
         $this->charsetForSearch = $charsetForSearch;
     }
 
-    /** @return string */
     public function getCharsetForSearch(): string
     {
         return $this->charsetForSearch;
@@ -117,21 +116,13 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    /**
-     * @param \DateTime $messagesBefore
-     * @return ImapSearchCriteria
-     */
-    public function setBefore(\DateTime $messagesBefore): ImapSearchCriteria // "date" - match messages with Date: before "date"
+    public function setBefore(\DateTimeInterface $messagesBefore): ImapSearchCriteria // "date" - match messages with Date: before "date"
     {
         $this->before = $messagesBefore;
 
         return $this;
     }
 
-    /**
-     * @param string $stringInBody
-     * @return ImapSearchCriteria
-     */
     public function setBodyContains(string $stringInBody): ImapSearchCriteria // "string" - match messages with "string" in the body of the message
     {
         $this->bodyContains = $stringInBody;
@@ -151,9 +142,6 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    /**
-     * @return ImapSearchCriteria
-     */
     public function filterDeleted(): ImapSearchCriteria // - match deleted messages
     {
         $this->deleted = true;
@@ -163,7 +151,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
 
     /**
      * Filter only emails flagged as Important (sometimes Urgent)
-     * @return $this
+     * @return static
      */
     public function filterFlagged(): ImapSearchCriteria // - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
     {
@@ -200,7 +188,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterByDate(\DateTime $dateTime): ImapSearchCriteria // "date" - match messages with Date: matching "date"
+    public function filterByDate(\DateTimeInterface $dateTime): ImapSearchCriteria // "date" - match messages with Date: matching "date"
     {
         $this->byDate = $dateTime;
 
@@ -221,7 +209,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    public function filterSince(\DateTime $since): ImapSearchCriteria // "date" - match messages with Date: after "date"
+    public function filterSince(\DateTimeInterface $since): ImapSearchCriteria // "date" - match messages with Date: after "date"
     {
         $this->since = $since;
 
@@ -284,193 +272,121 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isAll(): bool
     {
         return $this->all;
     }
 
-    /**
-     * @return bool
-     */
     public function isAnswered(): bool
     {
         return $this->answered;
     }
 
-    /**
-     * @return string
-     */
     public function getBccContains(): string
     {
         return $this->bccContains;
     }
 
-    /**
-     * @return \DateTime|null
-     */
-    public function getBefore()
+    public function getBefore(): ?\DateTimeInterface
     {
         return $this->before;
     }
 
-    /**
-     * @return string
-     */
     public function getBodyContains(): string
     {
         return $this->bodyContains;
     }
 
-    /**
-     * @return string
-     */
     public function getCcContains(): string
     {
         return $this->ccContains;
     }
 
-    /**
-     * @return bool
-     */
     public function isDeleted(): bool
     {
         return $this->deleted;
     }
 
-    /**
-     * @return bool
-     */
     public function isImportant(): bool
     {
         return $this->important;
     }
 
-    /**
-     * @return string
-     */
     public function getFromContains(): string
     {
         return $this->fromContains;
     }
 
-    /**
-     * @return string
-     */
     public function getKeywordContains(): string
     {
         return $this->keywordContains;
     }
 
-    /**
-     * @return bool
-     */
     public function isNew(): bool
     {
         return $this->new;
     }
 
-    /**
-     * @return bool
-     */
     public function isOldOnly(): bool
     {
         return $this->oldOnly;
     }
 
-    /**
-     * @return \DateTime|null
-     */
-    public function getByDate()
+    public function getByDate(): ?\DateTimeInterface
     {
         return $this->byDate;
     }
 
-    /**
-     * @return bool
-     */
     public function isRecent(): bool
     {
         return $this->recent;
     }
 
-    /**
-     * @return bool
-     */
     public function isRead(): bool
     {
         return $this->read;
     }
 
-    /**
-     * @return \DateTime|null
-     */
-    public function getSince()
+    public function getSince(): ?\DateTimeInterface
     {
         return $this->since;
     }
 
-    /**
-     * @return string
-     */
     public function getSubjectContains(): string
     {
         return $this->subjectContains;
     }
 
-    /**
-     * @return string
-     */
     public function getTextContains(): string
     {
         return $this->textContains;
     }
 
-    /**
-     * @return string
-     */
     public function getToContains(): string
     {
         return $this->toContains;
     }
 
-    /**
-     * @return bool
-     */
     public function isUnanswered(): bool
     {
         return $this->unanswered;
     }
 
-    /**
-     * @return bool
-     */
     public function isNotDeleted(): bool
     {
         return $this->notDeleted;
     }
 
-    /**
-     * @return bool
-     */
     public function isNotImportant(): bool
     {
         return $this->notImportant;
     }
 
-    /**
-     * @return string
-     */
     public function getKeywordNotContains(): string
     {
         return $this->keywordNotContains;
     }
 
-    /**
-     * @return bool
-     */
     public function isUnread(): bool
     {
         return $this->unread;
@@ -560,7 +476,7 @@ class ImapSearchCriteria extends StrictObject implements ToString
         return 'ALL';
     }
 
-    private function formatDate(\DateTime $dateTime): string
+    private function formatDate(\DateTimeInterface $dateTime): string
     {
         return $dateTime->format('j F Y');
     }
