@@ -1,6 +1,6 @@
-#Downloads attachment from an email via IMAP
+# Downloads attachment from an email via IMAP
 
-# Usage
+## Usage
 ```php
 <?php
 namespace Heaven\Should\Has\Api;
