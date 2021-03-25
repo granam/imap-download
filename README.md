@@ -1,4 +1,6 @@
-# Downloads attachment from an email via IMAP
+# IMAP email attachments fetcher
+
+*Downloads attachment from an email via IMAP*
 
 ## Usage
 ```php
